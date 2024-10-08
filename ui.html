@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Form Builder</title>
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      height: 100vh;
+      background-color: #F0F0F3;
+    }
+
+    .sidebar {
+      width: 30%;
+      background-color: #F7F7F8;
+      padding: 16px;
+      border-right: 1px solid #E0E0E0;
+    }
+
+    .sidebar h3 {
+      font-size: 14px;
+      margin-bottom: 12px;
+      color: #333;
+      font-weight: 500;
+    }
+
+    .sidebar .field {
+      display: flex;
+      align-items: center;
+      background-color: #FFF;
+      padding: 8px;
+      border: 1px solid #E0E0E0;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      cursor: grab;
+      font-size: 12px;
+      color: #333;
+    }
+
+    .dropzone {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+      background-color: #FFF;
+      border-left: 1px solid #E0E0E0;
+    }
+
+    .dropzone p {
+      color: #999;
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+
+    .form-builder {
+      width: 100%;
+      max-width: 100%;
+      background-color: #FFF;
+      padding: 12px;
+      border-radius: 4px;
+      border: 1px solid #E0E0E0;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-field {
+      padding: 8px;
+      margin-bottom: 8px;
+      background-color: #F9F9F9;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      border: 1px solid #E0E0E0;
+    }
+
+    .form-field input,
+    .form-field select {
+      border: none;
+      background: none;
+      font-size: 12px;
+      flex-grow: 1;
+      padding: 4px;
+      margin: 0;
+      outline: none;
+    }
+
+    button {
+      margin-top: 16px;
+      padding: 8px 16px;
+      background-color: #0061F2;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background-color 0.2s;
+    }
+
+    button:hover {
+      background-color: #0051D4;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <h3>Form Fields</h3>
+    <div class="field" draggable="true" data-field="Name">Name</div>
+    <div class="field" draggable="true" data-field="Email">Email</div>
+    <div class="field" draggable="true" data-field="Address">Address</div>
+    <div class="field" draggable="true" data-field="Phone">Phone</div>
+    <div class="field" draggable="true" data-field="Single Line">Single Line</div>
+    <div class="field" draggable="true" data-field="Multi Line">Multi Line</div>
+    <div class="field" draggable="true" data-field="Number">Number</div>
+    <div class="field" draggable="true" data-field="Date">Date</div>
+    <div class="field" draggable="true" data-field="Dropdown">Dropdown</div> <!-- Added Dropdown field -->
+  </div>
+
+  <div class="dropzone">
+    <p>Drag fields to create a form</p>
+    <div class="form-builder"></div>
+    <button id="submit">Submit Form</button>
+  </div>
+
+  <script>
+    const fields = document.querySelectorAll('.field');
+    const formBuilder = document.querySelector('.form-builder');
+    const dropzone = document.querySelector('.dropzone');
+    let formFields = [];
+
+    // Make fields draggable
+    fields.forEach(field => {
+      field.addEventListener('dragstart', e => {
+        e.dataTransfer.setData('text/plain', field.getAttribute('data-field'));
+      });
+    });
+
+    // Allow dropping on the dropzone
+    dropzone.addEventListener('dragover', e => {
+      e.preventDefault();
+    });
+
+    // Handle drop event
+    dropzone.addEventListener('drop', e => {
+      e.preventDefault();
+      const fieldType = e.dataTransfer.getData('text/plain');
+      formFields.push({ label: fieldType });
+
+      let fieldElement;
+
+      if (fieldType === "Dropdown") {
+        fieldElement = document.createElement('div');
+        fieldElement.className = 'form-field';
+        fieldElement.innerHTML = `
+          <label for="${fieldType}-select">${fieldType}</label>
+          <select id="${fieldType}-select">
+            <option value="Option 1">Option 1</option>
+            <option value="Option 2">Option 2</option>
+            <option value="Option 3">Option 3</option>
+          </select>
+        `;
+      } else {
+        fieldElement = document.createElement('div');
+        fieldElement.className = 'form-field';
+        fieldElement.innerHTML = `<input type="text" value="${fieldType}" />`;
+      }
+
+      formBuilder.appendChild(fieldElement);
+
+      // Make label editable
+      const input = fieldElement.querySelector('input');
+      if (input) {
+        input.addEventListener('change', () => {
+          const index = Array.from(formBuilder.children).indexOf(fieldElement);
+          formFields[index].label = input.value;
+        });
+      }
+    });
+
+    // Submit form
+    document.getElementById('submit').addEventListener('click', () => {
+      parent.postMessage({ pluginMessage: { type: 'create-form', fields: formFields.map(f => f.label) } }, '*');
+    });
+  </script>
+
+</body>
+</html>
