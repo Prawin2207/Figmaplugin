@@ -530,7 +530,8 @@ figma.ui.onmessage = async (msg) => {
         dropdownInput.appendChild(dropdownArrow); // Add dropdownArrow inside the dropdown input
         
         formYOffset += 60; // Space for the next field
-      }        
+      }  
+           
 
 
       else {
@@ -572,6 +573,8 @@ figma.ui.onmessage = async (msg) => {
 
         // Adjust the height of the form frame based on content
         const totalHeight = msg.fields.length * (200 + formFrame.itemSpacing);
+        console.log(msg.fields.length);
+        console.log(formFrame.itemSpacing);
         formFrame.resize(600, totalHeight); // Resize based on number of fields
         sidebarFrame.resize(600,totalHeight);
     
