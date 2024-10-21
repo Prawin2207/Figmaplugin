@@ -531,6 +531,66 @@ figma.ui.onmessage = async (msg) => {
         
         formYOffset += 60; // Space for the next field
       }  
+      else if (field === "Radio") {
+        // Define radio button options
+        const options = ['Option 1', 'Option 2', 'Option 3'];
+        const spacing = 10; // Space between buttons
+        let yOffset = 0; // Vertical offset for positioning
+    
+        // Create a parent frame to hold all radio buttons
+        const parentFrame = figma.createFrame();
+        parentFrame.resize(220, (30 + spacing) * options.length + 30); // Set size of the parent frame (including label)
+        parentFrame.name = "Radio Buttons"; // Optional: name your frame for better organization
+        parentFrame.layoutMode = "VERTICAL"; // Set layout mode to vertical for automatic stacking
+        parentFrame.primaryAxisAlignItems = "MIN"; // Align items at the start of the frame
+        parentFrame.counterAxisAlignItems = "MIN"; // Align items at the start of the counter axis
+    
+        // Create label for the radio buttons
+        const radioLabel = figma.createText();
+        radioLabel.characters = "Radio"; // Set label text
+        radioLabel.fontSize = 16; // Set font size for the label
+        radioLabel.fills = [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }]; // Text color
+        
+    
+        // Positioning the label slightly above and to the left of the radio buttons
+        radioLabel.x = 10; // Slightly offset from the left edge of parentFrame
+        radioLabel.y = 5;  // Slightly offset from the top edge of parentFrame
+    
+        parentFrame.appendChild(radioLabel); // Append label to the parent frame
+    
+        // Use a for...of loop to handle async operations correctly
+        for (const option of options) {
+            // Create a frame for each radio button
+            const frame = figma.createFrame();
+            frame.resize(200, 30); // Set size of the button frame
+            
+            // Create a circle for the radio button
+            const circle = figma.createEllipse();
+            circle.resize(20, 20); // Set size of the circle
+            circle.fills = [{ type: 'SOLID', color: { r: 0.8, g: 0.8, b: 0.8 } }]; // Default color
+            
+            // Create text for the option
+            const text = figma.createText();
+            text.fontName = { family: "Inter", style: "Regular" }; // Set font name
+            text.characters = option; // Set text content
+            text.fontSize = 14;
+            text.x = 30; // Positioning next to the circle
+            
+            // Position elements within the button frame
+            circle.x = 5; // Position circle inside button frame
+            frame.appendChild(circle);
+            frame.appendChild(text);
+            
+            // Append each radio button frame to the parent frame
+            parentFrame.appendChild(frame);
+            
+            yOffset += circle.height + spacing; // Update offset for next button (not needed with layout mode)
+        }
+    
+        formFrame.appendChild(parentFrame); // Add the parent frame to the form
+    
+       // Close the plugin after creating buttons (if needed)
+    }
            
 
 
@@ -572,16 +632,20 @@ figma.ui.onmessage = async (msg) => {
     });
 
         // Adjust the height of the form frame based on content
-        const totalHeight = msg.fields.length * (200 + formFrame.itemSpacing);
+        const totalHeight = msg.fields.length * (180 + formFrame.itemSpacing);
         console.log(msg.fields.length);
         console.log(formFrame.itemSpacing);
-        formFrame.resize(600, totalHeight); // Resize based on number of fields
+        formFrame.resize(600, totalHeight ); // Resize based on number of fields
         sidebarFrame.resize(600,totalHeight);
+      
     
         // Ensure scrolling appears if content exceeds visible area
         if (totalHeight > containerFrame.height) {
           containerFrame.resize(800, totalHeight); // Adjust container height if needed
           containerFrame.scrollBehavior = 'SCROLL'; // Enable scrolling behavior if necessary
+        }
+        else{
+          containerFrame.resize(800, totalHeight);
         }
         
         figma.viewport.scrollAndZoomIntoView([containerFrame]);
